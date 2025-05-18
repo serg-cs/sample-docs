@@ -1,0 +1,36 @@
+name: build-docs
+
+on:
+  push:
+    paths:
+      - markdown-docs/**
+  workflow_dispatch:
+
+jobs:
+  build-docs:
+    runs-on: ubuntu-latest
+    steps:        
+      - name: Checkout 
+        uses: actions/checkout@v4
+
+      - name: Setup Rust
+        uses: actions-rs/toolchain@v1 
+        with: 
+          toolchain: stable 
+          profile: minimal 
+          override: true 
+
+      - name: Build docs
+        run: |
+          git clone https://github.com/serg-cs/docs-builder.git
+          cd docs-builder
+          cargo run ../markdown-docs ../docs
+          cd ..
+          
+      - name: Push changes to website branch
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "no-reply@sample-domain.io"
+          git add docs
+          git commit -m "GitHub Actions updated docs"
+          git push
